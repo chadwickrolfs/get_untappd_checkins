@@ -28,16 +28,16 @@ def get_checkins(url):
 
 checkins_response = get_checkins(checkins_url)
 checkins_json = checkins_response.json()
-with open("checkins_{pagina}.log", "w") as clph:
+with open(f"checkins_{pagina:02d}.log", "w") as clph:
     json.dump(checkins_json, clph, indent=4)
 checkins.update(checkins_json)
 
-if checkins_json["meta"]["response"] == 200:
+if checkins_json["meta"]["code"] == 200:
     while checkins_json["response"]["pagination"].get("next_url"):
         nu = checkins["response"]["pagination"]["next_url"]
         print(f"next_url: {nu}")
         pagina += 1
-        print(f"pagina: {pagina}")
+        print(f"pagina: {pagina:02d}")
         next_url = (
             f"{checkins_json['response']['pagination']['next_url']}"
             f"&access_token={cred['checkins_access_token']}"
@@ -46,7 +46,7 @@ if checkins_json["meta"]["response"] == 200:
         )
         checkins_response = get_checkins(next_url)
         checkins_json = checkins_response.json()
-        with open(f"checkins_{pagina}.log", "w") as clph:
+        with open(f"checkins_{pagina:02d}.log", "w") as clph:
             json.dump(checkins_json, clph, indent=4)
         checkins.update(checkins_json)
         if nu == "" or nu is None:
