@@ -1,3 +1,15 @@
+# TODO:
+# mock the untapd server with fastapi
+# use click to ask to continue during while loop
+# backup checkins_file
+# read in checkins_file and get latest checkin_id
+# during while loop
+#    break if latest checkin_id found
+#    ask if continue or break
+# update checkins dict
+# write checkins dict to new checkins_file
+# put it all in sqlite
+
 import json
 import requests
 
@@ -11,6 +23,11 @@ checkins_access_token: str = cred["checkins_access_token"]
 checkins_url: str = (
     "https://api.untappd.com/v4/user/checkins?"
     f"access_token={checkins_access_token}"
+)
+cred_add = (
+    f"&access_token={cred['checkins_access_token']}"
+    f"&client_id={cred['client_id']}"
+    f"&client_secret={cred['client_secret']}"
 )
 
 
@@ -40,9 +57,7 @@ if checkins_json["meta"]["code"] == 200:
         print(f"pagina: {pagina:02d}")
         next_url = (
             f"{checkins_json['response']['pagination']['next_url']}"
-            f"&access_token={cred['checkins_access_token']}"
-            f"&client_id={cred['client_id']}"
-            f"&client_secret={cred['client_secret']}"
+            f"{cred_add}"
         )
         checkins_response = get_checkins(next_url)
         checkins_json = checkins_response.json()
