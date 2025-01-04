@@ -89,8 +89,14 @@ def get_checkins():
     pagina = 1
     checkins = []
     just_checkins = []
-    checkins_log = "checkins.log"
+
     checkins_file = "checkins.json"
+    checkins_file_path = db_path/Path(checkins_file)
+    just_checkins_file = "just_checkins.json"
+    just_checkins_file_path = db_path/Path(just_checkins_file)
+
+    checkins_log = "checkins.log"
+
     checkins_access_token: str = cred["checkins_access_token"]
     checkins_url: str = (
         "https://api.untappd.com/v4/user/checkins?"
@@ -134,7 +140,8 @@ def get_checkins():
             break
 
     Path(checkins_log).write_text(f"{checkins}")
-    Path(checkins_file).write_text(json.dumps(checkins, indent=4))
+    checkins_file_path.write_text(json.dumps(checkins, indent=4))
+    just_checkins_file_path.write_text(json.dumps(just_checkins, indent=4))
 
     return "SUCCESS get_checkins ended"
 
