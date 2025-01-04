@@ -1,4 +1,8 @@
 # TODO:
+# [ ] put it all in sqlite
+#    but this module is get_ so hmm...
+#    this will make it easier to synchronise
+#    since just json files cannot be easily shifted
 # [P] mock the untapd server with fastapi
 # [ ] use typer to ask to continue during while loop
 # [X] backup checkins_file
@@ -8,7 +12,6 @@
 # [ ]    ask if continue or break
 # [X] update checkins dict (now a list)
 # [ ] write checkins dict to new checkins_file
-# [ ] put it all in sqlite
 
 import time
 import json
@@ -108,18 +111,18 @@ def get_checkins():
         f"&client_secret={cred['client_secret']}"
     )
 
-    # checkins_ids = [checkin["checkin_id"] for checkin in just_checkins]
-    # if not here, then also must check in the while loop
-    # put in a function ?
-    # if last_db_id in checkins_ids:
-    #     # does this truncate the json or just the local var ?
-    #     # position = checkins_ids.index(last_db_id)
-    #     # just_checkins = just_checkins[:position - 1]
-    #     found_last_db_id = True
-
     checkins, checkins_json, just_checkins = get_checkins_json(
         checkins_url, pagina, checkins, just_checkins
     )
+
+    checkins_ids = [checkin["checkin_id"] for checkin in just_checkins]
+    # if not here, then also must check in the while loop
+    # put in a function ?
+    if last_db_id in checkins_ids:
+        # does this truncate the json or just the local var ?
+        # position = checkins_ids.index(last_db_id)
+        # just_checkins = just_checkins[:position - 1]
+        found_last_db_id = True
 
     if found_last_db_id:
         return "get_checkins ended on first page"
