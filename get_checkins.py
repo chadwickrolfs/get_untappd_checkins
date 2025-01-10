@@ -1,10 +1,20 @@
+"""get_checkins.py
+just get all checkins, backing up directory db if exists
+there are 100 calls allowed per hour, and 64 pages.
+if the pages ever get too large then this will fail
+or a timer needs to be introduced
+
+just call from a venv with requests like:
+    python ./get_checkins.py
+"""
 import time
 import json
-import requests
 from datetime import datetime
 from pathlib import Path
 
 from untappd_cred import cred
+
+import requests
 
 
 RATE_WARNING_THRESHOLD = 5
@@ -57,18 +67,11 @@ def get_checkins_json(checkins_url, pagina, checkins):
 
 
 def get_checkins():
-    found_last_db_id = False
     db_path = Path("db")
     if db_path.exists():
         db_path.rename(f"db_{datetime.now().strftime('%F')}")
     else:
         db_path.mkdir()
-    # must be replaced with a call to the FastAPI served by work
-    # last_db_id = 0
-    # if db_files := sorted([f for f in db_path.iterdir()]):
-    #     last_checkins = json.loads(db_files[0].read_text())
-    #     last_db_id = last_checkins[
-    #             "response"]["checkins"]["items"][0]["checkin_id"]
 
     pagina = 1
     checkins = []
@@ -90,22 +93,6 @@ def get_checkins():
     )
 
     checkins, checkins_json = get_checkins_json(checkins_url, pagina, checkins)
-
-    # will be a call to wherever work is serving
-    # to get latest id served by FastAPI
-    # checkins_ids = [checkin["checkin_id"] for checkin in just_checkins]
-    # if not here, then also must check in the while loop
-    # put in a function ?
-    # if last_db_id in checkins_ids:
-    #     does this truncate the json or just the local var ?
-    #     position = checkins_ids.index(last_db_id)
-    #     just_checkins = just_checkins[:position - 1]
-    #     found_last_db_id = True
-
-    if found_last_db_id:
-        return "get_checkins ended on first page"
-        # return "SUCCESS get_checkins ended on first page"
-
     while nu := checkins_json["response"]["pagination"].get("next_url"):
         pagina += 1
         next_url = (f"{nu}{cred_add}")
