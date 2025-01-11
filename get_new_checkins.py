@@ -78,17 +78,18 @@ def get_checkins_json(checkins_url, pagina, checkins):
 def to_last_checkin(checkins, last_checkin_id, new_checkins):
     found_last = False
     checkin_items = checkins[0]["response"]["checkins"]["items"]
-    checkins_ids = [checkin["checkin_id"] for checkin in checkin_items]
+    checkins_ids = [int(checkin["checkin_id"]) for checkin in checkin_items]
     print(
         f"looking for {last_checkin_id}"
         f"\nin {checkins_ids}\n"
     )
+
     if last_checkin_id in checkins_ids:
         print("last_checkin_id found")
         found_last = True
         position = checkins_ids.index(last_checkin_id)
         print(f"position of last id: {position}")
-        new_checkins += [checkin for checkin in checkin_items[:position - 1]]
+        new_checkins += [checkin for checkin in checkin_items[:position]]
     else:
         print("last_checkin_id NOT found")
         new_checkins += [checkin for checkin in checkin_items]
@@ -119,17 +120,17 @@ def get_new_checkins(
         checkins,
     )
     if isinstance(local_checkins, dict):
-        last_checkin_id = next(iter(local_checkins))
+        last_checkin_id = int(next(iter(local_checkins)))
         print(f"last_checkin_id: {last_checkin_id}")
     else:
-        print(f"last_checkin_id not found ! : {last_checkin_id}")
+        print("last_checkin_id not found !")
         #  could be none, could be string
         #  in any case, something wrong, just return and stop
         return local_checkins
 
     db_path = Path(db_pathname)
     if db_path.exists():
-        db_path.rename(f"db_{datetime.now().strftime('%F')}")
+        db_path.rename(f"{db_pathname}_{datetime.now().strftime('%F')}")
     else:
         db_path.mkdir()
 
@@ -158,12 +159,14 @@ def get_new_checkins(
         write_db_and_log(new_checkins, checkins_log_path, checkins_file_path)
         return "SUCCESS get_checkins ended on first page"
     else:
-        print("did not find last")
+        print("did not find last, continuing to query untappd")
+        # return "FAIL get_checkins should have ended on first page"
 
     while nu := checkins_json["response"]["pagination"].get("next_url"):
         pagina += 1
         next_url = (f"{nu}{cred_add}")
         time.sleep(5)
+        print(f"untappd page {pagina}")
 
         checkins, checkins_json = get_checkins_json(next_url, pagina, checkins)
         new_checkins, found_last = to_last_checkin(
