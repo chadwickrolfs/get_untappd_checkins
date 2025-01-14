@@ -124,7 +124,7 @@ def get_new_checkins(
         print(f"last_checkin_id: {last_checkin_id}")
     else:
         print("last_checkin_id not found !")
-        #  could be none, could be string
+        #  local_checkins could be none, could be string
         #  in any case, something wrong, just return and stop
         return local_checkins
 
