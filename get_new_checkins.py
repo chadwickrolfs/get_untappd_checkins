@@ -15,8 +15,12 @@ from pathlib import Path
 
 from untappd_cred import cred
 
+import typer
 
-RATE_WARNING_THRESHOLD = 5
+
+app: typer = typer.Typer()
+
+RATE_WARNING_THRESHOLD: int = 5
 
 
 def Non200(Exception):
@@ -42,8 +46,7 @@ def get_local_checkins(checkins_url, pagina, checkins):
     try:
         local_response = requests.get(checkins_url, timeout=5)
     except requests.exceptions.ConnectionError as e:
-        print(f"connection error:\n{e}")
-        return "get_checkins connection to current checkins failure"
+        return f"get_checkins connection to current checkins failure:\n{e}"
 
     return local_response.json()
 
@@ -123,10 +126,10 @@ def get_new_checkins(
         last_checkin_id = int(next(iter(local_checkins)))
         print(f"last_checkin_id: {last_checkin_id}")
     else:
-        print("last_checkin_id not found !")
+        print(f"last_checkin_id not found:\n{local_checkins}")
         #  local_checkins could be none, could be string
         #  in any case, something wrong, just return and stop
-        return local_checkins
+        raise typer.Exit()
 
     db_path = Path(db_pathname)
     if db_path.exists():
@@ -186,13 +189,15 @@ def get_new_checkins(
     return "SUCCESS get_checkins ended"
 
 
-def main():
-    local_hostname = "localhost"
-    local_port = "9990"
-    local_path = "/all"
-    db_pathname = "new_checkins_db"
-    checkins_log = "new_checkins.log"
-    checkins_file = "new_checkins.json"
+@app.command()
+def main(
+    local_hostname: str = "localhost",
+    local_port: str = "9990",
+    local_path: str = "/all",
+    db_pathname: str = "new_checkins_db",
+    checkins_log: str = "new_checkins.log",
+    checkins_file: str = "new_checkins.json",
+):
     print(
         f"{get_new_checkins(
             local_hostname,
@@ -206,4 +211,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    app()
